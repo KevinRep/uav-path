@@ -70,6 +70,17 @@ class UAVPathPlanning:
                     pos2 = all_positions[id2]
                     dist = np.sqrt((pos1[0] - pos2[0])**2 + (pos1[1] - pos2[1])**2)
                     self.distances[id1][id2] = dist
+        
+        # 确保所有地点ID都在距离矩阵中
+        for id1 in all_positions:
+            for id2 in all_positions:
+                if id1 != id2 and (id1 not in self.distances or id2 not in self.distances[id1]):
+                    pos1 = all_positions[id1]
+                    pos2 = all_positions[id2]
+                    dist = np.sqrt((pos1[0] - pos2[0])**2 + (pos1[1] - pos2[1])**2)
+                    if id1 not in self.distances:
+                        self.distances[id1] = {}
+                    self.distances[id1][id2] = dist
     
     def can_uav_serve_location(self, uav_id, location_id):
         """
@@ -138,13 +149,23 @@ class UAVPathPlanning:
         else:
             target_pos = self.locations[target_location_id]['position']
         
-        distance = self.distances[current_id][target_location_id]
+        # 直接计算距离，不依赖于distances字典
+        distance = np.sqrt((current_pos[0] - target_pos[0])**2 + (current_pos[1] - target_pos[1])**2)
         flight_time = distance / uav['speed']
         
         # 更新无人机位置和路径
         uav['current_position'] = target_pos
         uav['path'].append(target_pos)
         uav['flight_time'] += flight_time
+        
+        # 更新距离矩阵
+        if current_id not in self.distances:
+            self.distances[current_id] = {}
+        self.distances[current_id][target_location_id] = distance
+        
+        if target_location_id not in self.distances:
+            self.distances[target_location_id] = {}
+        self.distances[target_location_id][current_id] = distance
         
         return flight_time
     
