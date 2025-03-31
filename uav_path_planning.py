@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import time
 from collections import defaultdict
-
+plt.rcParams['font.sans-serif'] = ['SimHei']  # 使用黑体
+plt.rcParams['axes.unicode_minus'] = False  # 解决负号显示问题
 class UAVPathPlanning:
     def __init__(self):
         # 初始化地点、资源需求、无人机及其携带的资源

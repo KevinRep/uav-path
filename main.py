@@ -4,8 +4,8 @@ from uav_path_planning import UAVPathPlanning
 import time
 import matplotlib.pyplot as plt
 import numpy as np
-from resource_validator import validate_resources, print_resource_validation_results, suggest_resource_adjustments, print_adjustment_suggestions
-
+plt.rcParams['font.sans-serif'] = ['SimHei']  # 使用黑体
+plt.rcParams['axes.unicode_minus'] = False  # 解决负号显示问题
 def test_algorithm(algorithm_name, planner):
     """测试指定的算法并返回总时间"""
     print(f"\n===== 测试{algorithm_name} =====")
@@ -48,7 +48,7 @@ def setup_scenario():
     # 地点4需要1个资源b和1个资源d
     planner.add_location(4, (6, 7), {'b': 1, 'd': 1})
     # 地点5需要2个资源c和1个资源d
-    planner.add_location(5, (3, 6), {'c': 2, 'd': 1})
+    planner.add_location(5, (3, 6), {'c': 1, 'd': 1})
     
     # 添加无人机及其携带的资源
     # 无人机1携带2个资源a、1个资源b、3个资源c
@@ -56,43 +56,7 @@ def setup_scenario():
     # 无人机2携带2个资源a、1个资源b、4个资源d
     planner.add_uav(2, {'a': 2, 'b': 1, 'd': 4}, speed=1.2)
     
-    # 不再进行资源验证和自动调整
-    
     return planner
-
-def adjust_resources(planner, suggestions):
-    """根据建议自动调整无人机资源
-    :param planner: UAVPathPlanning实例
-    :param suggestions: 资源调整建议
-    """
-    print("\n===== 自动调整资源 =====")
-    
-    # 为每种资源不足的情况，选择一个合适的无人机增加资源
-    for resource, amount_needed in suggestions.items():
-        print(f"需要增加资源 {resource}: {amount_needed} 个")
-        
-        # 找出已经携带该资源的无人机
-        carriers = []
-        for uav_id, uav_info in planner.uavs.items():
-            if resource in uav_info['resources_carried']:
-                carriers.append(uav_id)
-        
-        if carriers:
-            # 选择第一个携带该资源的无人机增加资源
-            uav_id = carriers[0]
-            planner.uavs[uav_id]['resources_carried'][resource] += amount_needed
-            planner.uavs[uav_id]['remaining_resources'][resource] += amount_needed
-            print(f"  - 增加无人机 {uav_id} 的资源 {resource}: +{amount_needed} 个")
-        else:
-            # 如果没有无人机携带该资源，选择第一个无人机添加该资源
-            uav_id = list(planner.uavs.keys())[0]
-            if resource not in planner.uavs[uav_id]['resources_carried']:
-                planner.uavs[uav_id]['resources_carried'][resource] = amount_needed
-                planner.uavs[uav_id]['remaining_resources'][resource] = amount_needed
-            else:
-                planner.uavs[uav_id]['resources_carried'][resource] += amount_needed
-                planner.uavs[uav_id]['remaining_resources'][resource] += amount_needed
-            print(f"  - 为无人机 {uav_id} 添加资源 {resource}: {amount_needed} 个")
 
 def main():
     """主函数"""
